@@ -1,0 +1,142 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.math.*;
+
+
+public class Voltageamp extends JFrame {
+
+	private JTextField input,output,Av,resistA,resistB,resistE,resistC;
+	private JButton button;
+	InputVoltage inVol = new InputVoltage();
+	PrintPanel print = new PrintPanel();
+	
+	double Vcc = 10;
+	double beta = 175;
+	
+	MyListener listener = new MyListener();
+	
+	public Voltageamp() {
+		setTitle("BJT 증폭기");
+		setSize(1000,200);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		setLayout(new BorderLayout());
+		
+		button = new JButton("OK");
+		button.addActionListener(listener);
+		JPanel ButtonPanel = new JPanel();
+		ButtonPanel.add(button);
+		add(inVol,BorderLayout.NORTH);
+		add(ButtonPanel,BorderLayout.CENTER);
+		add(print,BorderLayout.SOUTH);
+		
+		setVisible(true);
+		
+	}
+	
+	class InputVoltage extends JPanel {
+		public InputVoltage() {
+			JPanel inputPanel = new JPanel();
+			setLayout(new GridLayout(1,0));
+			setBorder(BorderFactory.createTitledBorder("변수입력"));
+			
+			inputPanel.add(new JLabel("입력전압(mV)"));
+			input = new JTextField(10);
+			input.addActionListener(listener);
+			inputPanel.add(input);
+			
+			inputPanel.add(new JLabel("R1(Kohm)"));
+			resistA = new JTextField(10);
+			resistA.addActionListener(listener);
+			inputPanel.add(resistA);
+			
+			inputPanel.add(new JLabel("R2(Kohm)"));
+			resistB = new JTextField(10);
+			resistB.addActionListener(listener);
+			inputPanel.add(resistB);
+			
+			inputPanel.add(new JLabel("Re(ohm)"));
+			resistE = new JTextField(10);
+			resistE.addActionListener(listener);
+			inputPanel.add(resistE);
+			
+			inputPanel.add(new JLabel("Rc(ohm)"));
+			resistC = new JTextField(10);
+			resistC.addActionListener(listener);
+			inputPanel.add(resistC);
+			
+			add(inputPanel);
+			setVisible(true);
+			setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			
+			
+		}
+	}
+	
+	class PrintPanel extends JPanel{
+		public PrintPanel() {
+			JPanel print = new JPanel();
+			setLayout(new GridLayout(1,1));
+			
+			print.add(new JLabel("Av(배수)"));
+			output = new JTextField(15);
+			output.setEditable(false);
+			print.add(output);
+			
+			setBorder(BorderFactory.createTitledBorder("출력"));
+			add(print);
+			setVisible(true);
+			setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			
+			
+		}
+	}
+
+	private class MyListener implements ActionListener{
+		public void actionPerformed(ActionEvent e) {
+			if (e.getSource()==button || e.getSource() ==resistA || e.getSource()==resistB || e.getSource()==resistE || e.getSource()==resistC) {
+				
+				String value1 = resistA.getText();	//R1값
+				double R1 = Integer.parseInt(value1);
+				
+				String value2 = resistB.getText();	//R2값
+				double R2 = Integer.parseInt(value2);
+				
+				String value3 = resistE.getText();	//Re값
+				double R3 = Integer.parseInt(value3);
+				
+				String value4 = resistC.getText();	//R c값
+				double R4 = Integer.parseInt(value4);
+				
+				double Rbase,Rtot;
+				double Ve,Vb,re,Ie,att,AvResult;
+				
+				Vb = (R2/(R1+R2))*Vcc;
+				Ve = Vb-0.7;
+				
+				re = (52/(1000*Ve))*R3;
+				
+				
+				Rbase = (beta*(re+R3))/1000;
+				Rtot = 1/((1/R1)+(1/R2)+(1/Rbase));
+				
+				att = Rtot/(0.6+Rtot);
+				
+				AvResult = (R4/R3)*att;
+				
+				AvResult = (Math.round(AvResult*100)/100.0);
+				
+				output.setText(""+AvResult);
+				
+				
+			}
+		}
+		
+	}
+	
+	public static void main(String[] args) {
+		Voltageamp f = new Voltageamp();
+	}
+	
+}
